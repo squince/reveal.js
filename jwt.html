@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>GLG JWT Auth</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/glg.css" id="theme">
+    <!-- Code syntax highlighting -->
+    <link rel="stylesheet" href="lib/css/zenburn.css">
+    <!-- Printing and PDF exports -->
+    <script>
+      var link = document.createElement( 'link' );
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+      document.getElementsByTagName( 'head' )[0].appendChild( link );
+    </script>
+    <!--[if lt IE 9]>
+    <script src="lib/js/html5shiv.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+    <div class="reveal">
+      <!-- Any section element inside of this container is displayed as a slide -->
+      <div class="slides">
+        <section>
+          <h1>
+            <span class="logo">GLG</span><span class="glg-red-slash">/</span>JWT Auth
+          </h1>
+          <h5>
+            Amit Segal, Steve Quince
+          </h5>
+        </section>
+
+        <section>
+          <section>
+            <h2>What's your problem?</h2>
+          </section>
+          <section>
+            <p>
+              We don't have a secure, scalable, general-purpose way to allow non-GLG employees to access our database and sevices.
+            </p>
+          </section>
+          <section>
+            <h3>Quick Review</h3>
+            <ul>
+              <li>Auth = Auth<em><b>entication</b></em> + Auth<em><b>orization</b></em>
+              <li>Authentication is ensuring that someone is who they claim to be
+              <li>Authorization is ensuring that a user is allowed to access these things, but not those things
+            </ul>
+          </section>
+          <section>
+            <h3>Status Quo</h3>
+            <ul>
+              <li>LDAP / Active Directory restricts access to our employees
+              <li>Non-employee users must be proxied through a server that we control
+              <li>Our servers restrict access using system-wide special user accounts
+            </ul>
+          </section>
+          <section>
+            <p>
+              How can we allow non-GLG employees client-side web-app access to our database &amp; services without compromising security?
+            </p>
+          </section>
+        </section>
+
+        <section>
+          <h2>To the Bat Cave!</h2>
+          <a href="http://ship.glgresearch.com/pay-me/src/index.html" target="_blank">http://ship.glgresearch.com/pay-me</a>
+        </section>
+
+        <section>
+          <section>
+            <h2>How on earth did you do THAT?</h2>
+          </section>
+          <section>
+            <h3>JSON Web Tokens</h3>
+            <h4>Because...</h4>
+            <p>
+              <ul>
+                <li>duh, we just copied what Mark and Nick did
+                <li>using tokens mean we (and our users) don't have to manage usernames and passwords
+                <li>jwt is a well accepted standard that is broadly supported
+                <li>serverless one-page apps can still be protected
+                <li>we can finally use role based authorization
+              </ul>
+            </p>
+          </section>
+          <section>
+            <h3>A picture is worth a ...</h3>
+          </section>
+          <section>
+            <h3>Starphleet</h3>
+            <ul>
+              <li>Starphleet handles the heavy lifting
+              <li>redirects requests for JWT-secured Starphleet applications by non-authenticated users to the login app
+              <li>decodes <code>jwt</code> querystring parameter
+              <li>exposes the JWT payload properties as <code>jwt-</code> prefixed headers to any JWT-secured Starphleet-hosted application
+              <li>Starphleet sets a <code>jwt</code> cookie containing the entire JWT token (10min expiration)
+            </ul>
+          </section>
+          <section>
+            <h3>Login app</h3>
+            <ul>
+              <li>verifies that the email address exists in the <code>PERSON</code> table
+              <li>sends an email with a link to the original target URL
+              <li>includes a JWT token in the querystring (1hr expiration)
+              <li>the JWT from the login app contains a <code>role</code> &amp; <code>personid</code>, &amp; <code>cmid</code> if applicable
+            </ul>
+          </section>
+          <section>
+            <h3>Epiquery2</h3>
+            <ul>
+              <li>no code changes to Epiquery 2 were required - yeah!
+              <li>a separate instance of Epiquery 2 is secured by JWT just like any other Starphleet application
+              <li>by convention we use a separate epiquery-templates repo for this JWT-secured epi instance,
+                  e.g., <code>epiquery-templates-cm</code> contains just the sql needed by apps exposed to CMs
+              <li>epiquery templates have access to the JWT payload properties exposed by Starphleet (e.g., <code>jwt-personid</code>)
+            </ul>
+          </section>
+          <section>
+            <h3>Your app</h3>
+            <ul>
+              <li>no changes are required to your application code to take advantage of this
+              <li>implementers may optionally choose to include meta data to be passed along in the JWT as properties of the payload
+              <li>to include additional meta data, your app would have to generate a JWT token including the additional payload properties
+              <li>e.g., the reminder-to-request-payment emails that CMs receive will include a URL with a <code>jwt</code> querystring
+                  parameter encoded with a payload property for the specific consultation <code>consultationid</code>
+            </ul>
+          </section>
+        </section>
+
+        <section>
+          <h2>Code Walk-About</h2>
+          <ul>
+            <li><a href="https://github.com/asegal/starphleet/tree/master/nginx/lua" target="_blank">Starphleet Lua Scripts</a>
+            <li><a href="https://github.com/glg/glg-jwt-auth/blob/master/src/server.js" target="_blank">GLG Login Code</a>
+            <li><a href="https://github.com/glg/epiquery-templates-cm" target="_blank">epiquery templates</a>
+            <li><a href="https://github.com/squince/ec2.starphleet.epi.headquarters/tree/master/epistream-cm" target="_blank">.jwt file</a>
+            <li><a href="https://github.com/squince/ec2.starphleet.epi.headquarters/blob/master/.starphleet#L11-L13" target="_blank">.starphleet config</a>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Great, how do I use it?</h2>
+          <p>
+            Basic
+            Super easy - just plop a .jwt file along side your orders file in the starphleet headquarters.  Optionally restrict it to a specific role. *see caveats below.
+            You need to be careful to restrict data access by using the jwt- properties in the epiquery templates
+          </p>
+          <p>
+            Advanced
+            You can create your own JWT token to embed additional meta data to pass along to the app and subsequently to a JWT protected service like epistream-cm.
+          </p>
+        </section>
+
+        <section>
+          <h2>Caveats</h2>
+          <p>
+            JWT token payloads are NOT encrypted.  They are only base64 encoded.  The signature is an HMAC encryption of the payload, the header, and a "secret".
+            The consumer (in our case, Starphleet) can then validate the values against the signature if it knows the "secret".  However (and this is the important bit)
+            that does not stop anybody else from seeing the values.  Takeaway - don't store anything sensitive (PII, passwords, keys, etc.) in the token.
+            http://jwt.io/
+          </p>
+          <p>
+            Right now, this is only implemented for CMs because that is our immediate need.  And, a small percentage of CMs will still not be able
+            to use this because of email duplication issues.
+          </p>
+          <p>
+            We suffer from historical bad decisions.
+            Clients and Employees have too many damn duplicate person records with the same exact email address.
+            To use this strategy, there must be a 1-to-1 between a person record and a unique email address in the person table.
+            Show examples:
+              a) same person with a single role with multiple person records
+              b) different persons with the same email address
+              c) same person with multiple roles, each with a different person record (which our DB schema does NOT require)
+          </p>
+        </section>
+
+      </div>
+
+    </div>
+
+    <script src="lib/js/head.min.js"></script>
+    <script src="js/reveal.js"></script>
+
+    <script>
+
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+
+        transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+          { src: 'plugin/zoom-js/zoom.js', async: true },
+          { src: 'plugin/notes/notes.js', async: true }
+        ]
+      });
+
+    </script>
+
+  </body>
+</html>
