@@ -26,6 +26,9 @@
   <body>
     <div class="reveal">
       <!-- Any section element inside of this container is displayed as a slide -->
+      <div class="header" style="visibility: hidden;">
+        <span class="logo">GLG</span><span class="glg-red-slash">/</span>JWT Auth
+      </div>
       <div class="slides">
         <section>
           <h1>
@@ -39,26 +42,24 @@
         <section>
           <section>
             <h2>What's your problem?</h2>
-          </section>
-          <section>
-            <p>
+            <p class="fragment">
               We don't have a secure, scalable, general-purpose way to allow non-GLG employees to access our database and sevices.
             </p>
           </section>
           <section>
             <h3>Quick Review</h3>
             <ul>
-              <li>Auth = Auth<em><b>entication</b></em> + Auth<em><b>orization</b></em>
-              <li>Authentication is ensuring that someone is who they claim to be
-              <li>Authorization is ensuring that a user is allowed to access these things, but not those things
+              <li class="fragment">Auth = Auth<em><b>entication</b></em> + Auth<em><b>orization</b></em>
+              <li class="fragment">Authentication is ensuring that someone is who they claim to be
+              <li class="fragment">Authorization is ensuring that a user is allowed to access these things, but not those things
             </ul>
           </section>
           <section>
             <h3>Status Quo</h3>
             <ul>
-              <li>LDAP / Active Directory restricts access to our employees
-              <li>Non-employee users must be proxied through a server that we control
-              <li>Our servers restrict access using system-wide special user accounts
+              <li class="fragment">LDAP / Active Directory restricts access to our employees
+              <li class="fragment">Non-employee users must be proxied through a server that we control
+              <li class="fragment">Our servers restrict access using system-wide special user accounts
             </ul>
           </section>
           <section>
@@ -79,56 +80,62 @@
           </section>
           <section>
             <h3>JSON Web Tokens</h3>
-            <h4>Because...</h4>
-            <p>
-              <ul>
-                <li>duh, we just copied what Mark and Nick did
-                <li>using tokens mean we (and our users) don't have to manage usernames and passwords
-                <li>jwt is a well accepted standard that is broadly supported
-                <li>serverless one-page apps can still be protected
-                <li>we can finally use role based authorization
-              </ul>
+            <p class="fragment" style="text-align: left;">
+              <strong>Because...</strong>
             </p>
+            <ul>
+              <li class="fragment">duh, we just copied what Mark and Nick did
+              <li class="fragment">using tokens mean we (and our users) don't have to manage usernames and passwords
+              <li class="fragment">jwt is a well accepted standard that is broadly supported
+              <li class="fragment">serverless one-page apps can still be protected
+              <li class="fragment">we can finally use role based authorization
+            </ul>
           </section>
           <section>
-            <h3>A picture is worth a ...</h3>
+            <h3>The Players</h3>
+            <ul>
+              <li>Starphleet nginx
+              <li>log-in app
+              <li>Starphleet services (e.g. epiquery)
+              <li>Starphleet apps (may be client-side, even serverless)
+            </ul>
           </section>
           <section>
             <h3>Starphleet</h3>
             <ul>
-              <li>Starphleet handles the heavy lifting
-              <li>redirects requests for JWT-secured Starphleet applications by non-authenticated users to the login app
-              <li>decodes <code>jwt</code> querystring parameter
-              <li>exposes the JWT payload properties as <code>jwt-</code> prefixed headers to any JWT-secured Starphleet-hosted application
-              <li>Starphleet sets a <code>jwt</code> cookie containing the entire JWT token (10min expiration)
+              <li class="fragment">Starphleet handles the heavy lifting
+              <li class="fragment">redirects requests for JWT-secured Starphleet applications by non-authenticated users to the login app
+              <li class="fragment">decodes <code>jwt</code> querystring parameter
+              <li class="fragment">exposes the JWT payload properties as <code>jwt-</code> prefixed headers to any JWT-secured Starphleet-hosted application
+              <li class="fragment">Starphleet sets a <code>jwt</code> cookie containing the entire JWT token (10min expiration)
             </ul>
           </section>
           <section>
             <h3>Login app</h3>
             <ul>
-              <li>verifies that the email address exists in the <code>PERSON</code> table
-              <li>sends an email with a link to the original target URL
-              <li>includes a JWT token in the querystring (1hr expiration)
-              <li>the JWT from the login app contains a <code>role</code> &amp; <code>personid</code>, &amp; <code>cmid</code> if applicable
+              <li class="fragment">verifies that the email address exists in the <code>PERSON</code> table
+              <li class="fragment">sends an email with a link to the original target URL
+              <li class="fragment">includes a JWT token in the querystring (1hr expiration)
+              <li class="fragment">the JWT from the login app contains a <code>role</code> &amp; <code>personid</code>, &amp; <code>cmid</code> if applicable
             </ul>
           </section>
           <section>
             <h3>Epiquery2</h3>
             <ul>
-              <li>no code changes to Epiquery 2 were required - yeah!
-              <li>a separate instance of Epiquery 2 is secured by JWT just like any other Starphleet application
-              <li>by convention we use a separate epiquery-templates repo for this JWT-secured epi instance,
+              <li class="fragment">no code changes to Epiquery 2 were required - yeah!
+              <li class="fragment">a separate instance of Epiquery 2 is secured by JWT just like any other Starphleet application
+              <li class="fragment">by convention we use a separate epiquery-templates repo for this JWT-secured epi instance,
                   e.g., <code>epiquery-templates-cm</code> contains just the sql needed by apps exposed to CMs
-              <li>epiquery templates have access to the JWT payload properties exposed by Starphleet (e.g., <code>jwt-personid</code>)
+              <li class="fragment">epiquery templates have access to the JWT payload properties exposed by Starphleet (e.g., <code>jwt-personid</code>)
             </ul>
           </section>
           <section>
             <h3>Your app</h3>
             <ul>
-              <li>no changes are required to your application code to take advantage of this
-              <li>implementers may optionally choose to include meta data to be passed along in the JWT as properties of the payload
-              <li>to include additional meta data, your app would have to generate a JWT token including the additional payload properties
-              <li>e.g., the reminder-to-request-payment emails that CMs receive will include a URL with a <code>jwt</code> querystring
+              <li class="fragment">no changes are required to your application code to take advantage of this
+              <li class="fragment">implementers may optionally choose to include meta data to be passed along in the JWT as properties of the payload
+              <li class="fragment">to include additional meta data, your app would have to generate a JWT token including the additional payload properties
+              <li class="fragment">e.g., the reminder-to-request-payment emails that CMs receive will include a URL with a <code>jwt</code> querystring
                   parameter encoded with a payload property for the specific consultation <code>consultationid</code>
             </ul>
           </section>
@@ -153,8 +160,8 @@
             <h3>Super Easy</h3>
             <p>
               <ul>
-                <li>just plop a <code>.jwt</code> file along side your <code>orders</code> file in the starphleet headquarters
-                <li>Optionally restrict access to a specific role (* see caveats below)
+                <li class="fragment">just plop a <code>.jwt</code> file along side your <code>orders</code> file in the starphleet headquarters
+                <li class="fragment">in epiquery templates, be careful to restrict data access by using the <code>jwt-</code> properties
               </ul>
             </p>
           </section>
@@ -162,9 +169,17 @@
             <h3>Advanced</h3>
             <p>
               <ul>
-                <li>embed additional meta data to pass along to the app by creating your own JWT token
-                <li>use the additional meta data in a JWT protected service like epistream-cm (available as a header provided by Starphleet)
-                <li>in epiquery templates, be careful to restrict data access by using the <code>jwt-</code> properties
+                <li class="fragment">restrict access to a specific role by including it in a comma-separated list within the <code>.jwt</code> file
+                <li class="fragment">embed additional meta data to pass along to a downstream app by creating your own JWT token
+                  <ul>
+                    <li class="fragment">use a short-lived expiration to prevent a replay attack vulnerability
+                    <li class="fragment"><code>exp</code> - expiration time in seconds since Epoch <strong>(Required)</strong>
+                    <li class="fragment"><code>iat</code> - issued at time in seconds since Epoch <strong>(Required)</strong>
+                      <ul>
+                        <li style="font-size:.7em">appended by default by many jwt libraries, e.g., node-jsonwebtoken
+                      </ul>
+                    </li>
+                  </ul>
               </ul>
             </p>
           </section>
@@ -177,32 +192,36 @@
           <section>
             <h3>Payloads are NOT encrypted</h3>
             <ul>
-              <li>JWT tokens are only base64 encoded
-              <li>the signature is an HMAC encryption of the payload, the header, and a "secret"
-              <li>because Starphleet knows the "secret" it is able to validate the values against the signature
-              <li>it is important to reiterate, this does not stop anybody else from seeing the values (checkout http://jwt.io/)
-              <li><strong><em>TAKEAWAY</em></strong> - don't store anything sensitive (PII, passwords, keys, etc.) in the token
+              <li class="fragment">JWT payload is only base64 encoded (not encrypted or hashed)
+              <li class="fragment">the signature is the payload, the header, and a "secret" hashed using HMAC SHA-256
+              <li class="fragment">because Starphleet knows the "secret" it is able to validate the values against the signature
+              <li class="fragment">it is important to reiterate, this does not stop anybody else from seeing the values
+                <ul><li style="font-size:.8em">checkout <a href="http://jwt.io/" target="_blank">http://jwt.io/</a></li></ul>
+              </li>
+              <li class="fragment"><strong><em>TAKEAWAY</em></strong> - don't store anything sensitive (PII, passwords, keys, etc.) in the token
             </ul>
           </section>
           <section>
             <h3>Members Only</h3>
             <ul>
-              <li>right now, this is implemented only for CMs because that is our immediate need
-              <li>a small percentage of CMs will require Member Solutions intervention to be able to use this because of email duplication issues
+              <li class="fragment">right now, this is implemented only for CMs because that is our immediate need
+              <li class="fragment">a small percentage of CMs will require Member Solutions intervention to be able to use this because of email duplication issues
             </ul>
           </section>
           <section>
             <h3>Clients &amp; Employees</h3>
             <ul>
-              <li>we suffer from design decisions made by our predecessors
-              <li>clients and employees have too many damn duplicate person records with the same exact email address
-              <li>there must be a 1-to-1 between a <code>PERSON</code> record and a unique email address in that table
+              <li class="fragment">we suffer from design decisions made by our predecessors
+              <li class="fragment">clients and employees have too many damn duplicate person records with the same exact email address
+              <li class="fragment">there must be a 1-to-1 between a <code>PERSON</code> record and a unique email address in that table
             </ul>
-            <h4>examples</h4>
+          </section>
+          <section>
+            <h3>Examples</h3>
             <ul>
-              <li>same person with a single role with multiple person records
-              <li>different persons with the same email address
-              <li>same person with multiple roles, each with a different person record (which our DB schema does NOT require)
+              <li class="fragment">same person with a single role with multiple person records
+              <li class="fragment">different persons with the same email address
+              <li class="fragment">same person with multiple roles, each with a different person record (which our DB schema does NOT require)
             </ul>
           </section>
         </section>

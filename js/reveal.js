@@ -415,6 +415,7 @@
 		setTimeout( function() {
 			// Enable transitions now that we're loaded
 			dom.slides.classList.remove( 'no-transition' );
+      showHideHeader();
 
 			loaded = true;
 
@@ -3734,6 +3735,14 @@
 
 	}
 
+  function showHideHeader() {
+    if(Reveal.isFirstSlide()) {
+      document.querySelector('div.header').style.visibility= 'hidden';
+    } else {
+      document.querySelector('div.header').style.visibility = null;
+    }
+  }
+
 	function navigateLeft() {
 
 		// Reverse for RTL
@@ -3746,7 +3755,7 @@
 		else if( ( isOverview() || previousFragment() === false ) && availableRoutes().left ) {
 			slide( indexh - 1 );
 		}
-
+    showHideHeader();
 	}
 
 	function navigateRight() {
@@ -3761,7 +3770,7 @@
 		else if( ( isOverview() || nextFragment() === false ) && availableRoutes().right ) {
 			slide( indexh + 1 );
 		}
-
+    showHideHeader();
 	}
 
 	function navigateUp() {

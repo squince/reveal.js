@@ -65,6 +65,14 @@ body {
 .logo {
   font-family: NHaasGroteskDSW02-Bd!important; }
 
+div.header {
+  font-size: 1em;
+  padding: 0.5em 0.5em;
+  position: fixed;
+  text-align: left;
+  width: 100%;
+}
+
 .glg-red-slash {
   color: #EA0015;
   padding: 0em 0.1em; }
@@ -157,10 +165,10 @@ body {
   padding: 0.5em 0em; }
 
 .reveal ul ul {
-  list-style-type: square; }
+  list-style-type: none; }
 
 .reveal ul ul ul {
-  list-style-type: circle; }
+  list-style-type: none; }
 
 .reveal ul ul,
 .reveal ul ol,
