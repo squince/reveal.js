@@ -146,43 +146,70 @@
         </section>
 
         <section>
-          <h2>Great, how do I use it?</h2>
-          <p>
-            Basic
-            Super easy - just plop a .jwt file along side your orders file in the starphleet headquarters.  Optionally restrict it to a specific role. *see caveats below.
-            You need to be careful to restrict data access by using the jwt- properties in the epiquery templates
-          </p>
-          <p>
-            Advanced
-            You can create your own JWT token to embed additional meta data to pass along to the app and subsequently to a JWT protected service like epistream-cm.
-          </p>
+          <section>
+            <h2>Great, how do I use it?</h2>
+          </section>
+          <section>
+            <h3>Super Easy</h3>
+            <p>
+              <ul>
+                <li>just plop a <code>.jwt</code> file along side your <code>orders</code> file in the starphleet headquarters
+                <li>Optionally restrict access to a specific role (* see caveats below)
+              </ul>
+            </p>
+          </section>
+          <section>
+            <h3>Advanced</h3>
+            <p>
+              <ul>
+                <li>embed additional meta data to pass along to the app by creating your own JWT token
+                <li>use the additional meta data in a JWT protected service like epistream-cm (available as a header provided by Starphleet)
+                <li>in epiquery templates, be careful to restrict data access by using the <code>jwt-</code> properties
+              </ul>
+            </p>
+          </section>
         </section>
 
         <section>
-          <h2>Caveats</h2>
-          <p>
-            JWT token payloads are NOT encrypted.  They are only base64 encoded.  The signature is an HMAC encryption of the payload, the header, and a "secret".
-            The consumer (in our case, Starphleet) can then validate the values against the signature if it knows the "secret".  However (and this is the important bit)
-            that does not stop anybody else from seeing the values.  Takeaway - don't store anything sensitive (PII, passwords, keys, etc.) in the token.
-            http://jwt.io/
-          </p>
-          <p>
-            Right now, this is only implemented for CMs because that is our immediate need.  And, a small percentage of CMs will still not be able
-            to use this because of email duplication issues.
-          </p>
-          <p>
-            We suffer from historical bad decisions.
-            Clients and Employees have too many damn duplicate person records with the same exact email address.
-            To use this strategy, there must be a 1-to-1 between a person record and a unique email address in the person table.
-            Show examples:
-              a) same person with a single role with multiple person records
-              b) different persons with the same email address
-              c) same person with multiple roles, each with a different person record (which our DB schema does NOT require)
-          </p>
+          <section>
+           <h2>Caveats</h2>
+          </section>
+          <section>
+            <h3>Payloads are NOT encrypted</h3>
+            <ul>
+              <li>JWT tokens are only base64 encoded
+              <li>the signature is an HMAC encryption of the payload, the header, and a "secret"
+              <li>because Starphleet knows the "secret" it is able to validate the values against the signature
+              <li>it is important to reiterate, this does not stop anybody else from seeing the values (checkout http://jwt.io/)
+              <li><strong><em>TAKEAWAY</em></strong> - don't store anything sensitive (PII, passwords, keys, etc.) in the token
+            </ul>
+          </section>
+          <section>
+            <h3>Members Only</h3>
+            <ul>
+              <li>right now, this is implemented only for CMs because that is our immediate need
+              <li>a small percentage of CMs will require Member Solutions intervention to be able to use this because of email duplication issues
+            </ul>
+          </section>
+          <section>
+            <h3>Clients &amp; Employees</h3>
+            <ul>
+              <li>we suffer from design decisions made by our predecessors
+              <li>clients and employees have too many damn duplicate person records with the same exact email address
+              <li>there must be a 1-to-1 between a <code>PERSON</code> record and a unique email address in that table
+            </ul>
+            <h4>examples</h4>
+            <ul>
+              <li>same person with a single role with multiple person records
+              <li>different persons with the same email address
+              <li>same person with multiple roles, each with a different person record (which our DB schema does NOT require)
+            </ul>
+          </section>
         </section>
-
+        <section>
+          <h2>The End</h2>
+        </section>
       </div>
-
     </div>
 
     <script src="lib/js/head.min.js"></script>
